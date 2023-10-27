@@ -1,12 +1,5 @@
 const { User, Thought } = require('../models');
 
-// // Aggregate function to format the timestamp
-// const timeFormat = async () => {
-//   const formatted = await Thought.aggregate()
-    
-//   return formatted;
-// }
-
 module.exports = {
   // Get all thoughts
   async getThoughts(req, res) {
@@ -17,6 +10,7 @@ module.exports = {
       res.status(500).json(err);
     }
   },
+
   // Get a thought
   async getSingleThought(req, res) {
     try {
@@ -32,26 +26,34 @@ module.exports = {
       res.status(500).json(err);
     }
   },
-  // Create a thought
+
+  // route for creating a thought
   async createThought(req, res) {
     try {
-      const thought = await Thought.create(req.body);
-      const user = await User.findOneAndUpdate(
-        { _id: req.body.userId },
+      const userId = req.params.userId; 
+      // Retrieve the user's username based on their ID
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+
+      const thought = await Thought.create({
+        thoughtText: req.body.thoughtText,
+        username: user.username,
+      });
+      
+      await User.updateOne(
+        { _id: userId },
         { $addToSet: { thoughts: thought._id } }
       );
-
-      if (!user) {
-        return res.status(404).json({
-          message: 'Thought created, but no user with that ID'
-        });
-      }
-      res.json('Created the thought!');
+  
+      return res.status(201).json('Created the thought!');
     } catch (err) {
-      console.log(err);
+      console.error(err);
       return res.status(500).json(err);
     }
   },
+  
   // Delete a thought
   async deleteThought(req, res) {
     try {
@@ -78,6 +80,7 @@ module.exports = {
       res.status(500).json(err);
     }
   },
+
   // Update a thought
   async updateThought(req, res) {
     try {
@@ -91,6 +94,16 @@ module.exports = {
         res.status(404).json({ message: 'No thought with this id!' });
       }
 
+      const user = await User.findOneAndUpdate(
+        { username: thought.username },
+        { $addToSet: { thoughts: thought._id } },
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(404).json({ message:'No User. Thought updated.'})
+      }
+
       res.json(thought);
     } catch (err) {
       res.status(500).json(err);
@@ -100,23 +113,35 @@ module.exports = {
   // Add reaction to thought
   async addThoughtReaction(req, res) {
     try {
+      const thoughtId = req.params.thoughtId;
+      const userId = req.params.userId; 
+      // Retrieve the user's username based on their ID
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'No user with that ID' });
+      }
+      // Create a new reaction with the user's username
+      const reaction = {
+        reactionBody: req.body.reactionBody,
+        username: user.username, // Set the reaction's username
+      };
+  
       const thought = await Thought.findOneAndUpdate(
-        { _id: req.params.thoughtId },
-        { $addToSet: { reactions: req.body} },
+        { _id: thoughtId },
+        { $addToSet: { reactions: reaction } },
         { runValidators: true, new: true }
       );
-
+  
       if (!thought) {
-        return res.status(404).json({ message: 'No thought with this Id!'});
+        return res.status(404).json({ message: 'No thought with this Id!' });
       }
-
-      res.json(thought);
+  
+      res.json({message: 'Reaction created'});
     } catch (err) {
       res.status(500).json(err);
     }
-
   },
-
+  
   // removing a reaction from a thought
   async removeThoughtReaction(req, res) {
     try {
@@ -130,7 +155,7 @@ module.exports = {
         return res.status(400).json({ message: 'No thought with this id!' });
       }
 
-      res.json(thought);
+      res.json({message: 'Reaction deleted'});
     } catch (err) {
       res.status(500).json(err);
     }

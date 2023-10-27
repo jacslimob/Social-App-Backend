@@ -12,17 +12,21 @@ const {
 } = require('../../controllers/thoughtController.js');
 
 // /api/thoughts
-router.route('/').get(getThoughts).post(createThought);
+router.route('/')
+  .get(getThoughts); 
+
+// /api/thoughts/:userId
+router.route('/:userId')
+  .post(createThought); 
 
 // /api/thoughts/:thoughtId
-router
-  .route('/:thoughtId')
-  .get(getSingleThought)
-  .put(updateThought)
-  .delete(deleteThought);
+router.route('/:thoughtId')
+  .get(getSingleThought) 
+  .put(updateThought) 
+  .delete(deleteThought); 
 
-// /api/thoughts/:thoughtId/reaction
-router.route('/:thoughtId/reaction').post(addThoughtReaction);
+// /api/thoughts/:thoughtId/reaction/:userId
+router.route('/:thoughtId/reaction/:userId').post(addThoughtReaction);
 
 // /api/thought/:thoughtId/reaction/:reactionId
 router.route('/:thoughtId/reaction/:reactionId').delete(removeThoughtReaction);

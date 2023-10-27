@@ -1,5 +1,10 @@
 const { Schema, Types } = require('mongoose');
 
+const format_date = (date) => {
+  const options = { timeZone: 'UTC', year: '2-digit', month: 'long', day: '2-digit' };
+  return date.toLocaleDateString('en-US', options);
+}
+
 const reactionSchema = new Schema(
   {
     reactionId: {
@@ -21,6 +26,7 @@ const reactionSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
+      get: format_date
     }
   },
   {
@@ -31,5 +37,7 @@ const reactionSchema = new Schema(
     id: false,
   }
 );
+
+
 
 module.exports = reactionSchema;

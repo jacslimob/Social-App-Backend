@@ -20,14 +20,14 @@ const userSchema = new Schema(
       {
         //Array of _id values referencing the Thought model
         type: Schema.Types.ObjectId,
-        ref: 'Thought'
+        ref: 'thought'
       },
     ],
     friends: [
       {
         //Array of _id values referencing the User model (self-reference)
         type: Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'user'
       },
     ],
   },
@@ -39,13 +39,10 @@ const userSchema = new Schema(
   }
 );
 //friendCount(virtual) that retrieves the length of the user's friends array
-// userSchema.virtual('friendCount').get(function () {
-//   // length of the users's friends
-//   if (this.friends.length < 1){
-//     return 0
-//   }
-//   return this.friends.length
-// });
+userSchema.virtual('friendCount').get(function () {
+  // length of the users's friends
+  return this.friends.length
+});
 //create model
 const User = model('user', userSchema);
 

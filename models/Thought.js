@@ -1,6 +1,10 @@
 const { Schema, model } = require('mongoose');
 const reactionSchema = require('./Reaction');
 
+const format_date = (date) => {
+  const options = { timeZone: 'UTC', year: '2-digit', month: 'long', day: '2-digit' };
+  return date.toLocaleDateString('en-US', options);
+}
 // Schema to create a thought model
 const thoughtSchema = new Schema(
   {
@@ -14,6 +18,7 @@ const thoughtSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now(),
+      get: format_date
     },
     username: {
       // This is the user that created this thought
@@ -25,10 +30,13 @@ const thoughtSchema = new Schema(
   {
     toJSON: {
       virtuals: true,
+      getters: true,
     },
     id: false,
   }
 );
+
+
 
 thoughtSchema
 // This needs to return length of the reaction array field
