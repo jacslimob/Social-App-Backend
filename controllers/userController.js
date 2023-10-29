@@ -64,7 +64,14 @@ module.exports = {
   // Delete a user 
   async deleteUser(req, res) {
     try {
-      const user = await User.findOneAndRemove({ _id: req.params.userId });
+      const id = req.params.userId;
+      
+      const user = User.findById({ _id: id });
+      await User.findOneAndDelete({ _id: id });
+      await User.updateMany(
+        { friends: id },
+        { $pull: { friends: id }}
+      );
 
       if (!user) {
         return res.status(404).json({ message: 'No such user exists' });
@@ -93,7 +100,7 @@ module.exports = {
           .json({ message: 'No user found with that ID :(' });
       }
 
-      res.json(user);
+      res.json({ message: `Friend added`});
     } catch (err) {
       res.status(500).json(err);
     }

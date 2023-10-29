@@ -1,10 +1,12 @@
 const { Schema, model } = require('mongoose');
 const reactionSchema = require('./Reaction');
 
-const format_date = (date) => {
-  const options = { timeZone: 'UTC', year: '2-digit', month: 'long', day: '2-digit' };
-  return date.toLocaleDateString('en-US', options);
+function format_date  (date)  {
+  const options = { timeZone: 'UTC', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric'};
+  return date.toLocaleString('en-US', options);
 }
+
+
 // Schema to create a thought model
 const thoughtSchema = new Schema(
   {
